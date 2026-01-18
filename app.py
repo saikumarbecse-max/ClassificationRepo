@@ -159,10 +159,10 @@ if uploaded_file is not None:
             model = joblib.load('pkl/logistic_model.pkl')
             y_predproba = model.predict_proba(X_test)[:, 1]
             y_pred = (y_predproba >= threshold_choice).astype(int)
-            metrics = calc_metrics(y_test,y_pred,y_predproba)
+            metrics = calc_metrics(y_test,y_pred)
 
         if metrics:
-            display_metrics(metrics,y_test,y_pred)
+            display_metrics(metrics,y_test,y_pred,y_predproba)
 
 
     except Exception as e:
