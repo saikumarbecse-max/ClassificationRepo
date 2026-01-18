@@ -69,7 +69,7 @@ def calc_metrics(y_test, y_pred):
 
 if uploaded_file is not None:
     try:
-        test_data = pd.read_csv(uploaded_file, sep=';')
+        test_data = pd.read_csv(uploaded_file, sep=',')
 
         # Preprocess the test data
         # Assuming the same preprocessing steps as training
