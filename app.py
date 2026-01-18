@@ -79,70 +79,25 @@ def display_metrics(metrics,y_test,y_pred,y_predproba):
 
     st.markdown("---")
 
-    left_col, right_col = st.columns(2)
-    # ---------- CONFUSION MATRIX (PLOT) ----------
-    with left_col:
-        st.subheader("🔍 Confusion Matrix")
+    # ---------- CONFUSION MATRIX (PLOT) ---------
+    st.subheader("🔍 Confusion Matrix")
+    cm = metrics["Confusion Matrix"]
+    fig, ax = plt.subplots(figsize=(4, 4))
+    sns.heatmap(
+        cm,
+        annot=True,
+        fmt="d",
+        cmap="Blues",
+        xticklabels=["Predicted No", "Predicted Yes"],
+        yticklabels=["Actual No", "Actual Yes"],
+        ax=ax
+    )
 
-        cm = metrics["Confusion Matrix"]
-        fig, ax = plt.subplots(figsize=(4, 4))
-
-        sns.heatmap(
-            cm,
-            annot=True,
-            fmt="d",
-            cmap="Blues",
-            xticklabels=["Predicted No", "Predicted Yes"],
-            yticklabels=["Actual No", "Actual Yes"],
-            ax=ax
-        )
-
-        ax.set_xlabel("Predicted Label")
-        ax.set_ylabel("True Label")
-        st.pyplot(fig)
-
-    # ---------- CLASSIFICATION REPORT ----------
-    with right_col:
-        st.subheader("📄 Classification Report")
-
-        report = classification_report(y_test, y_pred, output_dict=True)
-        report_df = pd.DataFrame(report).transpose()
-
-        st.dataframe(report_df, use_container_width=True)
-
-        csv = report_df.to_csv().encode("utf-8")
-        st.download_button(
-            "⬇️ Download Classification Report",
-            csv,
-            "classification_report.csv",
-            "text/csv"
-        )
+    ax.set_xlabel("Predicted Label")
+    ax.set_ylabel("True Label")
+    st.pyplot(fig)
 
     st.markdown("---")
-
-    # =======================
-    # PREDICTION SUMMARY
-    # =======================
-
-    st.subheader("📊 Prediction Summary")
-
-    pred_df = pd.DataFrame({
-        "Actual": y_test,
-        "Predicted": y_pred,
-        "Probability": y_predproba
-    })
-
-    col7, col8 = st.columns([1, 2])
-
-    with col7:
-        st.write("Prediction Counts")
-        st.bar_chart(pred_df["Predicted"].value_counts())
-
-    with col8:
-        st.write("Sample Predictions")
-        st.dataframe(pred_df.head(10), use_container_width=True)
-
-
 
 if uploaded_file is not None:
     try:
