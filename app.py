@@ -40,7 +40,7 @@ model_choice = st.selectbox(
 if model_choice == "Logistic Regression":
     threshold_choice = st.selectbox(
         "Select Probability Threshold",
-    [0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70]
+    [0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70], default= 0.50
     )
 
 def calc_metrics(y_test, y_pred):
