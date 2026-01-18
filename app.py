@@ -74,7 +74,7 @@ if uploaded_file is not None:
         # Preprocess the test data
         # Assuming the same preprocessing steps as training
         X_test = test_data.drop(columns=['y'])
-        y_test = test_data['y'].map({'yes': 1, 'no': 0})
+        y_test = test_data['y']
 
         # Make predictions based on selected model call this method predict_logistic_regression from logistic_model.py
         
