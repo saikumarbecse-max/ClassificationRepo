@@ -36,13 +36,12 @@ model_choice = st.selectbox(
     ]
 )
 
-threshold_choice = st.sidebar.slider(
-    "Select Probability Threshold",
-    min_value=0.0,
-    max_value=1.0,
-    value=0.5,
-    step=0.05
-)
+#show only if model choice is Logistic Regression
+if model_choice == "Logistic Regression":
+    threshold_choice = st.selectbox(
+        "Select Probability Threshold",
+    [0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70]
+    )
 
 def calc_metrics(y_test, y_pred):
     cm = confusion_matrix(y_test, y_pred, labels=[0, 1])
