@@ -1,6 +1,9 @@
 import streamlit as st
 import joblib
 import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
 from sklearn.metrics import (
     accuracy_score, roc_auc_score,precision_score, recall_score,
     f1_score, confusion_matrix, matthews_corrcoef
@@ -61,48 +64,85 @@ def calc_metrics(y_test, y_pred):
         "MCC": mcc
     }
 
-def display_metrics(metrics,y_test,y_pred):
+def display_metrics(metrics,y_test,y_pred,y_predproba):
 
-        tab1, tab2, tab3, tab4 = st.tabs(
-        ["📈 Metrics", "🔍 Confusion Matrix", "📄 Classification Report", "📊 Predictions"]
-    )
-        with tab1:
-            st.header("📈 Model Performance")
-            col1, col2, col3 = st.columns(3)
-            col1.metric("Accuracy", f"{metrics['Accuracy']:.3f}")
-            col2.metric("Precision", f"{metrics['Precision']:.3f}")
-            col3.metric("Recall", f"{metrics['Recall']:.3f}")
+    st.subheader("📈 Model Performance Metrics")
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Accuracy", f"{metrics['Accuracy']:.3f}")
+    col2.metric("Precision", f"{metrics['Precision']:.3f}")
+    col3.metric("Recall", f"{metrics['Recall']:.3f}")
 
-            col4, col5, col6 = st.columns(3)
-            col4.metric("F1 Score", f"{metrics['F1 Score']:.3f}")
-            col5.metric("AUC-ROC", f"{metrics['AUC-ROC']:.3f}")
-            col6.metric("MCC", f"{metrics['MCC']:.3f}")
+    col4, col5, col6 = st.columns(3)
+    col4.metric("F1 Score", f"{metrics['F1 Score']:.3f}")
+    col5.metric("AUC-ROC", f"{metrics['AUC-ROC']:.3f}")
+    col6.metric("MCC", f"{metrics['MCC']:.3f}")
 
+    st.markdown("---")
 
-        with tab2:
-            st.header("🔍 Confusion Matrix")
-            st.dataframe(
-                pd.DataFrame(
-                    metrics["Confusion Matrix"],
-                    columns=["Predicted No", "Predicted Yes"],
-                    index=["Actual No", "Actual Yes"]
-            )
+    left_col, right_col = st.columns(2)
+    # ---------- CONFUSION MATRIX (PLOT) ----------
+    with left_col:
+        st.subheader("🔍 Confusion Matrix")
+
+        cm = metrics["Confusion Matrix"]
+        fig, ax = plt.subplots(figsize=(4, 4))
+
+        sns.heatmap(
+            cm,
+            annot=True,
+            fmt="d",
+            cmap="Blues",
+            xticklabels=["Predicted No", "Predicted Yes"],
+            yticklabels=["Actual No", "Actual Yes"],
+            ax=ax
         )
 
-        with tab3:
-            st.header("📄 Classification Report")
-            report = classification_report(y_test, y_pred, output_dict=True)
-            report_df = pd.DataFrame(report).transpose()
-            st.dataframe(report_df)
+        ax.set_xlabel("Predicted Label")
+        ax.set_ylabel("True Label")
+        st.pyplot(fig)
 
-        with tab4:
-            st.header("📊 Prediction Summary")
-            predictions_df = pd.DataFrame({
-                "Actual": y_test,
-                "Predicted": y_pred
-            })
-            st.write("Prediction Counts:")
-            st.bar_chart(predictions_df["Predicted"].value_counts())
+    # ---------- CLASSIFICATION REPORT ----------
+    with right_col:
+        st.subheader("📄 Classification Report")
+
+        report = classification_report(y_test, y_pred, output_dict=True)
+        report_df = pd.DataFrame(report).transpose()
+
+        st.dataframe(report_df, use_container_width=True)
+
+        csv = report_df.to_csv().encode("utf-8")
+        st.download_button(
+            "⬇️ Download Classification Report",
+            csv,
+            "classification_report.csv",
+            "text/csv"
+        )
+
+    st.markdown("---")
+
+    # =======================
+    # PREDICTION SUMMARY
+    # =======================
+
+    st.subheader("📊 Prediction Summary")
+
+    pred_df = pd.DataFrame({
+        "Actual": y_test,
+        "Predicted": y_pred,
+        "Probability": y_predproba
+    })
+
+    col7, col8 = st.columns([1, 2])
+
+    with col7:
+        st.write("Prediction Counts")
+        st.bar_chart(pred_df["Predicted"].value_counts())
+
+    with col8:
+        st.write("Sample Predictions")
+        st.dataframe(pred_df.head(10), use_container_width=True)
+
+
 
 if uploaded_file is not None:
     try:
@@ -119,7 +159,7 @@ if uploaded_file is not None:
             model = joblib.load('pkl/logistic_model.pkl')
             y_predproba = model.predict_proba(X_test)[:, 1]
             y_pred = (y_predproba >= threshold_choice).astype(int)
-            metrics = calc_metrics(y_test,y_pred)
+            metrics = calc_metrics(y_test,y_pred,y_predproba)
 
         if metrics:
             display_metrics(metrics,y_test,y_pred)
