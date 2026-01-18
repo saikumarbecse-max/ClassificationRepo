@@ -33,17 +33,12 @@ model_choice = st.selectbox(
     ]
 )
 
-threshold_choice = st.selectbox(
-    "Select Threshold",
-    [
-        0.4,
-        0.45,
-        0.5,
-        0.55,
-        0.6,
-        0.65,
-        0.7
-    ]
+threshold_choice = st.sidebar.slider(
+    "Select Probability Threshold",
+    min_value=0.0,
+    max_value=1.0,
+    value=0.5,
+    step=0.05
 )
 
 def calc_metrics(y_test, y_pred):
@@ -67,20 +62,47 @@ def calc_metrics(y_test, y_pred):
     }
 
 def display_metrics(metrics,y_test,y_pred):
-    st.subheader("Evaluation Metrics")
-    st.write(f"Accuracy: {metrics['Accuracy']:.2f}")
-    st.write(f"AUC-ROC: {metrics['AUC-ROC']:.2f}")
-    st.write(f"Precision: {metrics['Precision']:.2f}")
-    st.write(f"Recall: {metrics['Recall']:.2f}")
-    st.write(f"F1 Score: {metrics['F1 Score']:.2f}")
-    st.write(f"MCC: {metrics['MCC']:.2f}")
 
-    st.subheader("Confusion Matrix")
-    st.write(metrics['Confusion Matrix'])
+        tab1, tab2, tab3, tab4 = st.tabs(
+        ["📈 Metrics", "🔍 Confusion Matrix", "📄 Classification Report", "📊 Predictions"]
+    )
+        with tab1:
+            st.header("📈 Model Performance")
+            col1, col2, col3 = st.columns(3)
+            col1.metric("Accuracy", f"{metrics['Accuracy']:.3f}")
+            col2.metric("Precision", f"{metrics['Precision']:.3f}")
+            col3.metric("Recall", f"{metrics['Recall']:.3f}")
 
-    st.subheader("Classification Report")
-    report = classification_report(y_test, y_pred, output_dict=True)
-    st.write(pd.DataFrame(report).transpose())
+            col4, col5, col6 = st.columns(3)
+            col4.metric("F1 Score", f"{metrics['F1 Score']:.3f}")
+            col5.metric("AUC-ROC", f"{metrics['AUC-ROC']:.3f}")
+            col6.metric("MCC", f"{metrics['MCC']:.3f}")
+
+
+        with tab2:
+            st.header("🔍 Confusion Matrix")
+            st.dataframe(
+                pd.DataFrame(
+                    metrics["Confusion Matrix"],
+                    columns=["Predicted No", "Predicted Yes"],
+                    index=["Actual No", "Actual Yes"]
+            )
+        )
+
+        with tab3:
+            st.header("📄 Classification Report")
+            report = classification_report(y_test, y_pred, output_dict=True)
+            report_df = pd.DataFrame(report).transpose()
+            st.dataframe(report_df)
+
+        with tab4:
+            st.header("📊 Prediction Summary")
+            predictions_df = pd.DataFrame({
+                "Actual": y_test,
+                "Predicted": y_pred
+            })
+            st.write("Prediction Counts:")
+            st.bar_chart(predictions_df["Predicted"].value_counts())
 
 if uploaded_file is not None:
     try:
