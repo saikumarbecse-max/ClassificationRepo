@@ -63,7 +63,7 @@ def calc_metrics(y_test, y_pred):
         "MCC": mcc
     }
 
-def display_metrics(metrics,y_test,y_pred,y_predproba):
+def display_metrics(metrics,y_test,y_pred):
 
     left_col, right_col = st.columns(2)
 
@@ -119,9 +119,14 @@ if uploaded_file is not None:
             y_predproba = model.predict_proba(X_test)[:, 1]
             y_pred = (y_predproba >= threshold_choice).astype(int)
             metrics = calc_metrics(y_test,y_pred)
+            
+        elif model_choice == "Decision Tree":
+            model = joblib.load('pkl/decision_tree_model.pkl')
+            y_pred = model.predict(X_test)
+            metrics = calc_metrics(y_test,y_pred)
 
         if metrics:
-            display_metrics(metrics,y_test,y_pred,y_predproba)
+            display_metrics(metrics,y_test,y_pred)
 
 
     except Exception as e:
