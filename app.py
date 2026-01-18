@@ -85,13 +85,15 @@ if uploaded_file is not None:
         
         #display evaluation metrics
             st.subheader("Evaluation Metrics")
-            st.write(f"Accuracy: {metrics['accuracy']:.2f}")
-            st.write(f"Precision: {metrics['precision']:.2f}")
-            st.write(f"Recall: {metrics['recall']:.2f}")
-            st.write(f"F1 Score: {metrics['f1_score']:.2f}")
+            st.write(f"Accuracy: {metrics['Accuracy']:.2f}")
+            st.write(f"AUC-ROC: {metrics['AUC-ROC']:.2f}")
+            st.write(f"Precision: {metrics['Precision']:.2f}")
+            st.write(f"Recall: {metrics['Recall']:.2f}")
+            st.write(f"F1 Score: {metrics['F1 Score']:.2f}")
+            st.write(f"MCC: {metrics['MCC']:.2f}")
         #display confusion metrics
             st.subheader("Confusion Matrix")
-            st.write(metrics['confusion_matrix'])
+            st.write(metrics['Confusion Matrix'])
 
     except Exception as e:
         st.error(f"Error processing file: {e}")
