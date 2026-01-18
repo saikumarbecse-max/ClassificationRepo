@@ -66,38 +66,43 @@ def calc_metrics(y_test, y_pred):
 
 def display_metrics(metrics,y_test,y_pred,y_predproba):
 
-    st.subheader("📈 Model Performance Metrics")
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Accuracy", f"{metrics['Accuracy']:.3f}")
-    col2.metric("Precision", f"{metrics['Precision']:.3f}")
-    col3.metric("Recall", f"{metrics['Recall']:.3f}")
+    left_col, right_col = st.columns(2)
 
-    col4, col5, col6 = st.columns(3)
-    col4.metric("F1 Score", f"{metrics['F1 Score']:.3f}")
-    col5.metric("AUC-ROC", f"{metrics['AUC-ROC']:.3f}")
-    col6.metric("MCC", f"{metrics['MCC']:.3f}")
+    #---------- METRICS DISPLAY ---------
+    with left_col:
+        st.subheader("📈 Model Performance Metrics")
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Accuracy", f"{metrics['Accuracy']:.3f}")
+        col2.metric("Precision", f"{metrics['Precision']:.3f}")
+        col3.metric("Recall", f"{metrics['Recall']:.3f}")
 
-    st.markdown("---")
+        col4, col5, col6 = st.columns(3)
+        col4.metric("F1 Score", f"{metrics['F1 Score']:.3f}")
+        col5.metric("AUC-ROC", f"{metrics['AUC-ROC']:.3f}")
+        col6.metric("MCC", f"{metrics['MCC']:.3f}")
+
+        st.markdown("---")
 
     # ---------- CONFUSION MATRIX (PLOT) ---------
-    st.subheader("🔍 Confusion Matrix")
-    cm = metrics["Confusion Matrix"]
-    fig, ax = plt.subplots(figsize=(4, 4))
-    sns.heatmap(
-        cm,
-        annot=True,
-        fmt="d",
-        cmap="Blues",
-        xticklabels=["Predicted No", "Predicted Yes"],
-        yticklabels=["Actual No", "Actual Yes"],
-        ax=ax
-    )
+    with right_col:
+        st.subheader("🔍 Confusion Matrix")
+        cm = metrics["Confusion Matrix"]
+        fig, ax = plt.subplots(figsize=(4, 4))
+        sns.heatmap(
+            cm,
+            annot=True,
+            fmt="d",
+            cmap="Blues",
+            xticklabels=["Predicted No", "Predicted Yes"],
+            yticklabels=["Actual No", "Actual Yes"],
+            ax=ax
+        )
 
-    ax.set_xlabel("Predicted Label")
-    ax.set_ylabel("True Label")
-    st.pyplot(fig)
+        ax.set_xlabel("Predicted Label")
+        ax.set_ylabel("True Label")
+        st.pyplot(fig)
 
-    st.markdown("---")
+        st.markdown("---")
 
 if uploaded_file is not None:
     try:
