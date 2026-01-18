@@ -5,11 +5,10 @@ from sklearn.metrics import (
     accuracy_score, roc_auc_score,precision_score, recall_score,
     f1_score, confusion_matrix, matthews_corrcoef
 )
+from sklearn.metrics import classification_report
 
 import warnings 
 warnings.filterwarnings('ignore')
-
-model = joblib.load('pkl/logistic_regression_model.pkl')
 
 # Set page configuration
 st.set_page_config(page_title="Bank Marketing Classifier", layout="centered")
@@ -67,6 +66,22 @@ def calc_metrics(y_test, y_pred):
         "MCC": mcc
     }
 
+def display_metrics(metrics,y_test,y_pred):
+    st.subheader("Evaluation Metrics")
+    st.write(f"Accuracy: {metrics['Accuracy']:.2f}")
+    st.write(f"AUC-ROC: {metrics['AUC-ROC']:.2f}")
+    st.write(f"Precision: {metrics['Precision']:.2f}")
+    st.write(f"Recall: {metrics['Recall']:.2f}")
+    st.write(f"F1 Score: {metrics['F1 Score']:.2f}")
+    st.write(f"MCC: {metrics['MCC']:.2f}")
+
+    st.subheader("Confusion Matrix")
+    st.write(metrics['Confusion Matrix'])
+
+    st.subheader("Classification Report")
+    report = classification_report(y_test, y_pred, output_dict=True)
+    st.write(pd.DataFrame(report).transpose())
+
 if uploaded_file is not None:
     try:
         test_data = pd.read_csv(uploaded_file, sep=',')
@@ -79,21 +94,14 @@ if uploaded_file is not None:
         # Make predictions based on selected model call this method predict_logistic_regression from logistic_model.py
         
         if model_choice == "Logistic Regression":
+            model = joblib.load('pkl/logistic_model.pkl')
             y_predproba = model.predict_proba(X_test)[:, 1]
             y_pred = (y_predproba >= threshold_choice).astype(int)
             metrics = calc_metrics(y_test,y_pred)
-        
-        #display evaluation metrics
-            st.subheader("Evaluation Metrics")
-            st.write(f"Accuracy: {metrics['Accuracy']:.2f}")
-            st.write(f"AUC-ROC: {metrics['AUC-ROC']:.2f}")
-            st.write(f"Precision: {metrics['Precision']:.2f}")
-            st.write(f"Recall: {metrics['Recall']:.2f}")
-            st.write(f"F1 Score: {metrics['F1 Score']:.2f}")
-            st.write(f"MCC: {metrics['MCC']:.2f}")
-        #display confusion metrics
-            st.subheader("Confusion Matrix")
-            st.write(metrics['Confusion Matrix'])
+
+        if metrics:
+            display_metrics(metrics,y_test,y_pred)
+
 
     except Exception as e:
         st.error(f"Error processing file: {e}")
